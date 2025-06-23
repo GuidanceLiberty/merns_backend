@@ -1,38 +1,39 @@
-const cors = require('cors')
-require('dotenv').config()
+import express from 'express';
+import mongoose from 'mongoose';
+import cors from 'cors';
+import dotenv from 'dotenv';
 
-const express = require('express')
-const mongoose = require('mongoose')
-const workoutRoutes = require('./routes/workouts')
-const userRoute = require('./routes/user')
+import workoutRoutes from './routes/workouts.js';
+import userRoute from './routes/user.js';
 
+dotenv.config();
 
-//express app
-const app = express()
-app.use(cors({origin: "http://localhost:3000", credentials: false}));
+const app = express();
 
-//Middleware
-app.use(express.json())
+// Allow requests from your frontend
+app.use(cors({
+  origin: "http://localhost:3000", // ⚠️ Change this to your frontend live URL when deployed
+  credentials: false
+}));
+
+// Middleware
+app.use(express.json());
 app.use((req, res, next) => {
-    console.log(req.path, req.method)
-    next()
-})
+  console.log(req.path, req.method);
+  next();
+});
 
-//Routes
-app.use('/api/workouts', workoutRoutes)
-app.use('/api/user', userRoute)
+// Routes
+app.use('/api/workouts', workoutRoutes);
+app.use('/api/user', userRoute);
 
-//CONNECT TO DB
+// Connect to DB
 mongoose.connect(process.env.MONG_URI)
-.then(() => {
-    //listen for request
+  .then(() => {
     app.listen(process.env.PORT, () => {
-    console.log('connected to db Atlas & listining on port', process.env.PORT)
-})
-})
-.catch((error) => {
-    console.log(error)
-})
-
-
-
+      console.log('✅ Connected to DB & listening on port', process.env.PORT);
+    });
+  })
+  .catch((error) => {
+    console.error('❌ MongoDB connection error:', error.message);
+  });

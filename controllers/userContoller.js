@@ -1,42 +1,38 @@
-const User = require('../models/userModel')
-const jwt = require('jsonwebtoken')
+import User from '../models/userModel.js';
+import jwt from 'jsonwebtoken';
 
 const createToken = (_id) => {
-  return jwt.sign({_id}, process.env.SECRET, { expiresIn: '3d'})
-}
+  return jwt.sign({ _id }, process.env.SECRET, { expiresIn: '3d' });
+};
 
 // LOGIN USER
-const loginUser = async (req, res) => {
-    const {email, password} = req.body
+export const loginUser = async (req, res) => {
+  const { email, password } = req.body;
 
-    try {
-       const user = await User.login(email, password) 
+  try {
+    const user = await User.login(email, password);
 
-       // create a token
-       const token = createToken(user._id)
+    // create a token
+    const token = createToken(user._id);
 
-       res.status(200).json({email, token})
+    res.status(200).json({ email, token });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
 
-    } catch (error) {
-        res.status(400).json({error: error.message})
-    }
+// SIGNUP USER
+export const signupUser = async (req, res) => {
+  const { email, password } = req.body;
 
-}
+  try {
+    const user = await User.signup(email, password);
 
-//SIGNUP USER
-const signupUser = async (req, res) => {
-    const {email, password} = req.body
+    // create a token
+    const token = createToken(user._id);
 
-    try {
-       const user = await User.signup(email, password) 
-
-       // create a token
-       const token = createToken(user._id)
-
-       res.status(200).json({email, token})
-    } catch (error) {
-        res.status(400).json({error: error.message})
-    }
-}
-
-module.exports = { signupUser, loginUser }
+    res.status(200).json({ email, token });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
