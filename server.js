@@ -10,10 +10,21 @@ dotenv.config();
 
 const app = express();
 
-// Allow requests from your frontend
+// ✅ Correct CORS setup to allow both localhost and live frontend
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://merns-frontend-urmi.onrender.com'  // ✅ Replace with your live frontend domain
+];
+
 app.use(cors({
-  origin: "http://localhost:3000", // ⚠️ Change this to your frontend live URL when deployed
-  credentials: false
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('❌ Not allowed by CORS: ' + origin));
+    }
+  },
+  credentials: true
 }));
 
 // Middleware
@@ -27,7 +38,7 @@ app.use((req, res, next) => {
 app.use('/api/workouts', workoutRoutes);
 app.use('/api/user', userRoute);
 
-// Connect to DB
+// Connect to MongoDB and start server
 mongoose.connect(process.env.MONG_URI)
   .then(() => {
     app.listen(process.env.PORT, () => {
