@@ -10,18 +10,18 @@ dotenv.config();
 
 const app = express();
 
-// ✅ CORS - DO NOT put full URL in app.use or route path
+// ✅ CORS CONFIG: Allow both local and live frontend
 const allowedOrigins = [
   'http://localhost:3000',
   'https://merns-frontend.onrender.com'
 ];
 
 app.use(cors({
-  origin: (origin, callback) => {
+  origin: function (origin, callback) {
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      callback(null, false); // Do not throw error
+      callback(new Error('Not allowed by CORS'));
     }
   },
   credentials: true,
@@ -29,24 +29,25 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
+// ✅ Required to handle preflight CORS requests
 app.options('*', cors());
 
-// Middleware
+// ✅ Middleware
 app.use(express.json());
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.path}`);
   next();
 });
 
-// ✅ Correct path routes, no full URLs
+// ✅ Routes
 app.use('/api/user', userRoute);
 app.use('/api/workouts', workoutRoutes);
 
-// Connect to MongoDB
+// ✅ Connect to DB and listen
 mongoose.connect(process.env.MONG_URI)
   .then(() => {
     app.listen(process.env.PORT, () => {
-      console.log('✅ Connected to DB & listening on port', process.env.PORT);
+      console.log(`✅ Connected to DB & listening on port ${process.env.PORT}`);
     });
   })
   .catch((error) => {
