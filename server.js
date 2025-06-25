@@ -10,17 +10,19 @@ dotenv.config();
 
 const app = express();
 
-// ✅ Correct full CORS setup
+// ✅ Safe CORS Setup (Does not crash on unauthorized origins)
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://merns-frontend.onrender.com'
+];
+
 app.use(cors({
   origin: (origin, callback) => {
-    const allowedOrigins = [
-      'http://localhost:3000',
-      'https://merns-frontend.onrender.com'
-    ];
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      console.warn('❌ Blocked by CORS:', origin);
+      callback(null, false); // Do NOT throw error
     }
   },
   credentials: true,
@@ -28,7 +30,7 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// ✅ Always include this for preflight responses
+// ✅ Handle preflight requests
 app.options('*', cors());
 
 // Middleware
